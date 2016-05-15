@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/flyinghawker/UTSA-LRSG/issues"
   },
-  "homepage": "https://github.com/flyinghawker/UTSA-LRSG#readme"
+  "homepage": "https://github.com/flyinghawker/UTSA-LRSG#readme",
+  "dependencies": {
+    "@angular2-material/checkbox": "^2.0.0-alpha.4",
+    "@angular2-material/core": "^2.0.0-alpha.4"
+  }
 }
