@@ -1,88 +1,85 @@
 module.exports = function(config) {
-
-  var appBase   = 'app/';      // transpiled app JS files
-  var appAssets ='/base/app/'; // component assets fetched by Angular's compiler
-
-  config.set({
+  var dependencies = require('./package.json').dependencies;
+  var excludedDependencies = [
+    'systemjs', 'zone.js', 'font-awesome', 'bootswatch'
+  ];
+  var configuration = {
     basePath: '',
+
     frameworks: ['jasmine'],
-    plugins: [
-      require('karma-jasmine'),
-      require('karma-chrome-launcher'),
-      require('karma-htmlfile-reporter')
-    ],
+    browsers: ['PhantomJS'],
+    reporters: ['progress', 'coverage'],
 
-    customLaunchers: {
-      // From the CLI. Not used here but interesting
-      // chrome setup for travis CI using chromium
-      Chrome_travis_ci: {
-        base: 'Chrome',
-        flags: ['--no-sandbox']
-      }
+    preprocessors: {
+      'app/**/!(*.spec)+(.js)': ['coverage'],
+      'app/**/*.js': ['sourcemap']
     },
+
+    // Generate json used for remap-istanbul
+    coverageReporter: {
+      dir: 'report/',
+      reporters: [
+        { type: 'json', subdir: 'report-json' }
+      ]
+    },
+
     files: [
-      // System.js for module loading
+      'node_modules/traceur/bin/traceur-runtime.js',
+      // IE required polyfills, in this exact order
+      'node_modules/es6-shim/es6-shim.min.js',
       'node_modules/systemjs/dist/system-polyfills.js',
-      'node_modules/systemjs/dist/system.src.js',
-
-      // Polyfills
-      'node_modules/es6-shim/es6-shim.js',
-
-      // Reflect and Zone.js
-      'node_modules/reflect-metadata/Reflect.js',
       'node_modules/zone.js/dist/zone.js',
-      'node_modules/zone.js/dist/jasmine-patch.js',
+      'node_modules/reflect-metadata/Reflect.js',
       'node_modules/zone.js/dist/async-test.js',
       'node_modules/zone.js/dist/fake-async-test.js',
+      'node_modules/systemjs/dist/system.src.js',
 
-      // RxJs.
-      { pattern: 'node_modules/rxjs/**/*.js', included: false, watched: false },
-      { pattern: 'node_modules/rxjs/**/*.js.map', included: false, watched: false },
-
-      // Angular 2 itself and the testing library
-      {pattern: 'node_modules/@angular/**/*.js', included: false, watched: false},
-      {pattern: 'node_modules/@angular/**/*.js.map', included: false, watched: false},
-
+      'systemjs.conf.js',
       'karma-test-shim.js',
 
-      // transpiled application & spec code paths loaded via module imports
-      {pattern: appBase + '**/*.js', included: false, watched: true},
+      { pattern: 'app/**/*.js', included: false },
+      { pattern: 'test/test-helpers/*.js', included: false },
 
-      // asset (HTML & CSS) paths loaded via Angular's component compiler
+      // paths loaded via Angular's component compiler
       // (these paths need to be rewritten, see proxies section)
-      {pattern: appBase + '**/*.html', included: false, watched: true},
-      {pattern: appBase + '**/*.css', included: false, watched: true},
+      { pattern: 'app/**/*.html', included: false },
+      { pattern: 'app/**/*.css', included: false },
 
-      // paths for debugging with source maps in dev tools
-      {pattern: appBase + '**/*.ts', included: false, watched: false},
-      {pattern: appBase + '**/*.js.map', included: false, watched: false}
+      // paths to support debugging with source maps in dev tools
+      { pattern: 'app/**/*.ts', included: false, watched: false },
+      { pattern: 'app/**/*.js.map', included: false, watched: false }
     ],
 
-    // proxied base paths for loading assets
+    // proxied base paths
     proxies: {
-      // required for component assets fetched by Angular's compiler
-      "/app/": appAssets
-    },
-
-    exclude: [],
-    preprocessors: {},
-    reporters: ['progress', 'html'],
-
-    // HtmlReporter configuration
-    htmlReporter: {
-      // Open this file to see results in browser
-      outputFile: '_test-output/tests.html',
-
-      // Optional
-      pageTitle: 'Unit Tests',
-      subPageTitle: __dirname
+      // required for component assests fetched by Angular's compiler
+      "/app/": "/base/app/",
+      "/test/": "/base/test/",
+      "/node_modules/": "/base/node_modules/"
     },
 
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false
-  })
+    autoWatch: false,
+    singleRun: true,
+  };
+
+  Object.keys(dependencies).forEach(function(key) {
+    if(excludedDependencies.indexOf(key) >= 0) { return; }
+
+    configuration.files.push({
+        pattern: 'node_modules/' + key + '/**/*.js',
+        included: false,
+        watched: false
+    });
+  });
+
+  if (process.env.APPVEYOR) {
+    configuration.browsers = ['IE'];
+    configuration.singleRun = true;
+    configuration.browserNoActivityTimeout = 90000; // Note: default value (10000) is not enough
+  }
+
+  config.set(configuration);
 }

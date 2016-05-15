@@ -1,7 +1,21 @@
 import {Component} from '@angular/core';
+import {RouterOutlet, RouteConfig, RouteDefinition} from '@angular/router-deprecated';
+import {APP_ROUTES} from './app.routes';
+import {NavbarComponent} from './navbar/navbar.component';
+import {LoggerService} from './blocks/logger.service';
 
 @Component({
-    selector: 'my-app',
-    template: '<h1>My First Angular 2 App</h1>'
+    selector: 'as-main-app',
+    templateUrl: 'app/app.html',
+    directives: [RouterOutlet, NavbarComponent]
 })
-export class AppComponent { }
+@RouteConfig(APP_ROUTES)
+export class AppComponent {
+    public appRoutes: RouteDefinition[];
+    private logger: LoggerService;
+
+    constructor(logger: LoggerService) {
+        this.logger = logger;
+        this.appRoutes = APP_ROUTES;
+    }
+}
