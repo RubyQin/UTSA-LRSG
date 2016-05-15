@@ -1,0 +1,19 @@
+{
+  "name": "utsa-lrsg",
+  "version": "1.0.0",
+  "description": "update utsa geological department offical webpage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flyinghawker/UTSA-LRSG.git"
+  },
+  "author": "Michael Chen, Ruby",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/flyinghawker/UTSA-LRSG/issues"
+  },
+  "homepage": "https://github.com/flyinghawker/UTSA-LRSG#readme"
+}
